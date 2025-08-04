@@ -1,8 +1,5 @@
-streamlit
 pandas
 requests
 redis
 pytz
-numpy
-gtfs-realtime-bindings
 Flask
