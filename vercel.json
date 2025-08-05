@@ -1,7 +1,16 @@
 {
+  "builds": [
+    {
+      "src": "api/cron.py",
+      "use": "@vercel/python",
+      "config": {
+        "pip": "requirements.txt"
+      }
+    }
+  ],
   "crons": [
     {
-      "path": "/api/cron/run-job",
+      "path": "/api/cron",
       "schedule": "0 15 * * *"
     }
   ]
