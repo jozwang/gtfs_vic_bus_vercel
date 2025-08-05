@@ -1,20 +1,23 @@
 # File: api/cron.py
 
-from flask import Flask, request
+from flask import Flask
 # Import your main function from the other file
 from data_processor import process_and_store_schedules
 
+# Vercel specifically looks for a variable named 'app' in this file
 app = Flask(__name__)
 
-# This route will be triggered by the Vercel Cron Job
-@app.route('/run-job', methods=['GET'])
-def handler():
-    # You can add a security check here if you want
-    # For example, check a secret header to ensure only Vercel calls this
+# This single "catch-all" route will handle any request sent to /api/cron
+# This is more reliable than defining a specific sub-path like /run-job
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
+def catch_all(path):
+    print("--- Cron job triggered via Flask. Starting data processing... ---")
     
     # Run your main data processing function
-    print("Cron job triggered. Starting data processing...")
     process_and_store_schedules()
-    print("Data processing finished.")
     
+    print("--- Data processing finished. Sending success response. ---")
+
+    # Send a 200 OK response back
     return "Cron job executed successfully.", 200
