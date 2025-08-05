@@ -12,14 +12,14 @@ import pytz
 def process_and_store_schedules():
     """
     Downloads GTFS data, processes it for today's and tomorrow's bus schedules
-    in Box Hill, and stores the result in Redis.
+    in Box Hill Bus Station, and stores the result in Redis.
     """
     # --- REVISED: Use the writable /tmp directory for file operations ---
     main_extract_path = "/tmp/gtfs_processing"
     
     # --- Setup ---
     url = "https://opendata.transport.vic.gov.au/dataset/3f4e292e-7f8a-4ffe-831f-1953be0fe448/resource/e4966d78-dc64-4a1d-a751-2470c9eaf034/download/gtfs.zip"
-    filter_keyword = "Box Hill"
+    filter_keyword = "Box Hill Bus"
     REDIS_URL = os.getenv("REDIS_URL")
     REDIS_KEY_NAME = "schedules:box_hill:today_and_tomorrow"
 
@@ -80,7 +80,7 @@ def process_and_store_schedules():
         'stop_lat', 'stop_lon', 'departure_time'
     ]
     final_df = active_box_hill_schedules[final_columns].sort_values(by=['route_short_name', 'departure_time'])
-    print(f"Found {len(final_df)} bus services for 'Box Hill' running today and tomorrow.")
+    print(f"Found {len(final_df)} bus services for 'Box Hill Bus Station' running today and tomorrow.")
 
     if REDIS_URL is None:
         print("❌ ERROR: REDIS_URL environment variable not set.")
