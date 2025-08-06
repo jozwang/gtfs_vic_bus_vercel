@@ -1,4 +1,5 @@
 # File: api/cron.py
+# New comment added to trigger Vercel deployment.
 
 from flask import Flask
 # Import your main function from the other file
@@ -21,3 +22,4 @@ def catch_all(path):
 
     # Send a 200 OK response back
     return "Cron job executed successfully.", 200
+
