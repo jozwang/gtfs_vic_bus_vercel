@@ -1,8 +1,8 @@
 # File: api/cron.py
-# New comment added to trigger Vercel deployment.
 
 from flask import Flask
 # Import your main function from the other file
+
 from data_processor import process_and_store_schedules
 
 # Vercel specifically looks for a variable named 'app' in this file
@@ -22,4 +22,5 @@ def catch_all(path):
 
     # Send a 200 OK response back
     return "Cron job executed successfully.", 200
+
 
