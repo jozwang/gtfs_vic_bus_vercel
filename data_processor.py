@@ -36,7 +36,8 @@ def process_and_store_schedules():
     response = requests.get(url, timeout=60)
     response.raise_for_status()
     with zipfile.ZipFile(io.BytesIO(response.content)) as z:
-        z.extract(os.path.join("4", "google_transit.zip"), path=main_extract_path)
+        # z.extract(os.path.join("4", "google_transit.zip"), path=main_extract_path)
+        z.extract("4/google_transit.zip", path=main_extract_path)
     bus_txt_files_path = os.path.join(main_extract_path, "bus_data")
     with zipfile.ZipFile(os.path.join(main_extract_path, "4", "google_transit.zip"), 'r') as nested_z:
         nested_z.extractall(bus_txt_files_path)
@@ -57,8 +58,7 @@ def process_and_store_schedules():
     print(f"Filtering for dates: {today_str} and {tomorrow_str}")
 
     active_services_df = calendar_dates_df[
-        (calendar_dates_df['date'].isin(dates_to_check)) &
-        (calendar_dates_df['exception_type'] == 1)
+        (calendar_dates_df['date'].isin(dates_to_check)) 
     ]
     
     if active_services_df.empty:
