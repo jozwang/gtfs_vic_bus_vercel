@@ -1,23 +1,14 @@
 {
-  "builds": [
-    {
-      "src": "api/cron.py",
-      "use": "@vercel/python",
-      "config": {
-        "pip": "requirements.txt"
-      }
-    }
-  ],
   "crons": [
     {
       "path": "/api/cron",
-      "schedule": "0 15 * * *"
+      "schedule": "0 16 * * *"
     }
   ],
-    "functions": {
+  "functions": {
     "api/cron.py": {
+      "runtime": "@vercel/python@3.0.0",
       "maxDuration": 60
     }
   }
 }
-
