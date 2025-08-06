@@ -33,10 +33,14 @@ def process_and_store_schedules():
 
     # --- The rest of your script remains the same ---
     print("Downloading and extracting GTFS data...")
-    response = requests.get(url, timeout=60)
-    response.raise_for_status()
+    try:
+        response = requests.get(url, timeout=60)
+        response.raise_for_status()
+    except requests.exceptions.RequestException as e:
+        print(f"❌ ERROR: Failed to download GTFS data: {e}")
+        return
+
     with zipfile.ZipFile(io.BytesIO(response.content)) as z:
-        # z.extract(os.path.join("4", "google_transit.zip"), path=main_extract_path)
         z.extract("4/google_transit.zip", path=main_extract_path)
     bus_txt_files_path = os.path.join(main_extract_path, "bus_data")
     with zipfile.ZipFile(os.path.join(main_extract_path, "4", "google_transit.zip"), 'r') as nested_z:
@@ -57,8 +61,10 @@ def process_and_store_schedules():
     
     print(f"Filtering for dates: {today_str} and {tomorrow_str}")
 
+    # --- REVISED: Get services active today and tomorrow ---
     active_services_df = calendar_dates_df[
-        (calendar_dates_df['date'].isin(dates_to_check)) 
+        (calendar_dates_df['date'].isin(dates_to_check)) &
+        (calendar_dates_df['exception_type'] == 1) # Exception_type 1 means 'service has been added'
     ]
     
     if active_services_df.empty:
@@ -69,17 +75,23 @@ def process_and_store_schedules():
     print("Joining and filtering schedules...")
     stops_filtered = stops_df[stops_df['stop_name'].str.contains(filter_keyword, case=False, na=False)]
     
+    # --- REVISED: Merge trips with calendar_dates first to associate trips with dates ---
+    trips_with_dates = pd.merge(trips_df, active_services_df, on='service_id', how='inner')
+
+    # Now merge the rest of the dataframes
     all_schedules = pd.merge(stops_filtered, stop_times_df, on='stop_id') \
-                      .merge(trips_df, on='trip_id') \
+                      .merge(trips_with_dates, on='trip_id') \
                       .merge(routes_df, on='route_id')
 
-    active_box_hill_schedules = pd.merge(all_schedules, active_services_df[['service_id']], on='service_id')
+    # The new 'date' column from calendar_dates_df is now included
+    # We can use this to differentiate trips that are the same on different days
     final_columns = [
         'trip_id', 'stop_sequence', 'route_id', 'route_short_name', 'route_long_name',
         'direction_id', 'service_id', 'trip_headsign', 'stop_name', 'stop_id',
-        'stop_lat', 'stop_lon', 'departure_time'
+        'stop_lat', 'stop_lon', 'departure_time', 'date' # <-- ADDED 'date' here
     ]
-    final_df = active_box_hill_schedules[final_columns].sort_values(by=['route_short_name', 'departure_time'])
+    
+    final_df = all_schedules[final_columns].sort_values(by=['date', 'departure_time'])
     print(f"Found {len(final_df)} bus services for 'Box Hill Bus Station' running today and tomorrow.")
 
     if REDIS_URL is None:
