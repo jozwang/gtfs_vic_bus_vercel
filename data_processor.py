@@ -63,8 +63,7 @@ def process_and_store_schedules():
 
     # --- REVISED: Get services active today and tomorrow ---
     active_services_df = calendar_dates_df[
-        (calendar_dates_df['date'].isin(dates_to_check)) &
-        (calendar_dates_df['exception_type'] == 1) # Exception_type 1 means 'service has been added'
+        (calendar_dates_df['date'].isin(dates_to_check))
     ]
     
     if active_services_df.empty:
